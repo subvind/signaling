@@ -2,6 +2,10 @@ signaling
 ========
 PeerJS is a library that takes advantage of WebRTC for secure real time communication peer-to-peer. The complicated bit is distributing IDs between all the peers so that they may get that initial connection between one another; hence, the name: "signaling" server.
 
+| Signaling                    | Hummingbird               |
+| ---------------------------- | ------------------------- |
+| ![image](images/neurons.jpg) | ![image](images/bird.jpg) |
+
 flow:
 - every user authenticates with firebase and has an email address
 - every user may search for other users by username, displayName, photo, description, location, url, and checkMark.
