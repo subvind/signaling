@@ -1,10 +1,9 @@
 {
-  "name": "project-name",
+  "name": "signaling",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
-  "private": true,
-  "license": "UNLICENSED",
+  "description": "a signaling server to exchange unique IDs between users that are confirmed via email while a pay wall manages verification and checkMarks; so it is somewhat like twitter in a messenger bird way except this library is more like the highly maneuverable figure 8 wing flapping hummingbird.",
+  "author": "Travis Burandt <travis.burandt@gmail.com> (https://istrav.com)",
+  "homepage": "https://istrav.com",
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
