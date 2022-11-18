@@ -5,7 +5,6 @@ import { AppService } from './app.service';
 
 import { CreateUserDto } from './create-user.dto';
 import { UpdateUserDto } from './update-user.dto';
-import { connect } from 'http2';
 
 @Controller()
 export class AppController {

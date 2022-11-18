@@ -43,7 +43,7 @@ export class AppService {
   }
 
   connect (fromId: string, toId: string) {
-    
+    return 'test'
   }
 
   getHello(): string {

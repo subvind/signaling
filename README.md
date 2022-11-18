@@ -10,7 +10,10 @@ flow:
 - after two users connect they transfer over to using WebRTC.
 - while stripe subscriptions is for users that want to have a checkMark next to their profile
 
-tech:
+dependents:
+- https://github.com/trabur/secret-optimizer
+
+requirements:
 - https://console.firebase.google.com/project/istrav/authentication/users
 - https://app.redislabs.com
 - https://dashboard.pusher.com
