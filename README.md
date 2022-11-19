@@ -7,12 +7,12 @@ PeerJS is a library that takes advantage of WebRTC for secure real time communic
 | ![image](images/neurons.jpg) | ![image](images/bird.jpg) |
 
 flow:
-- every user authenticates with firebase and has an email address
+- every user authenticates with firebase and has an email address.
 - every user may search for other users by username, displayName, photo, description, location, url, and checkMark.
-- every user may call any other user
-- every user may answer any other user's call event
+- every user may call any other user.
+- every user may answer any other user's call event.
 - after two users connect they transfer over to using WebRTC.
-- while stripe subscriptions is for users that want to have a checkMark next to their profile
+- while stripe subscriptions is for users that want to have a checkMark next to their profile.
 
 dependents:
 - https://github.com/trabur/secret-optimizer
