@@ -13,6 +13,7 @@ flow:
 - every user may answer any other user's call event.
 - after two users connect they transfer over to using WebRTC.
 - while stripe subscriptions is for users that want to have a checkMark next to their profile.
+- perfect initiating.
 
 dependents:
 - https://github.com/trabur/secret-optimizer
