@@ -25,7 +25,7 @@ export class AppController {
     page = page || 1;
     pageSize = pageSize || 100;
     filters = filters || null; // [{ checkMark: true }];
-    sortBy = sortBy || 'createdAt';
+    sortBy = sortBy || null; // 'createdAt';
     sortDirection = sortDirection || 'desc';
 
     return await this.appService.findAllUsers(page, pageSize, filters, sortBy, sortDirection)
