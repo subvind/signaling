@@ -25,29 +25,41 @@ export class AppService {
   async findAllUsers(
     page: number,
     pageSize: number,
-    filters: any,
+    filters: any[],
     sortBy: string,
     sortDirection: 'asc' | 'desc',
   ): Promise<any> {
     let that = this 
 
     let userIds = await this.redis.keys('user:*');
-    // console.log('userIds', userIds)
     
     // Apply filters, if any
-    for (const key in filters) {
-      const filterValue = filters[key];
-      userIds = userIds.filter((id) => {
-        return that.redis.get(id)[key] === filterValue
-      });
+    if (filters && filters.length) {
+      userIds = await Promise.all(
+        userIds.map(async (id) => {
+          let record = JSON.parse(await that.redis.get(id));
+          for (let f of filters) {
+            for (const key in f) {
+              if (record[key] === f[key]) {
+                return id;
+              }
+            }
+          }
+          return null;
+        })
+      );
+      userIds = userIds.filter(id => id !== null);
     }
+    // console.log('userIds', userIds)
 
     if (userIds.length) {
+      // Apply sorting, if any
       if (sortBy) {
-        // Apply sorting, if any
-        userIds = userIds.sort((a, b) => {
-          const aValue = that.redis.get(a)[sortBy];
-          const bValue = that.redis.get(b)[sortBy];
+        userIds = userIds.sort(async (a, b) => {
+          let aRecord = JSON.parse(await that.redis.get(a))
+          let bRecord = JSON.parse(await that.redis.get(b))
+          const aValue = aRecord[sortBy];
+          const bValue = bRecord[sortBy];
           if (aValue === bValue) {
             return 0;
           }

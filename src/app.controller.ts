@@ -17,7 +17,7 @@ export class AppController {
   async findAllUsers(
     @Query('page') page: number,
     @Query('pageSize') pageSize: number,
-    @Query('filters') filters: any[],
+    @Query('filters') filters: string,
     @Query('sortBy') sortBy: string,
     @Query('sortDirection') sortDirection: 'asc' | 'desc',
   ): Promise<any> {
@@ -26,9 +26,10 @@ export class AppController {
     pageSize = pageSize || 100;
     filters = filters || null; // [{ checkMark: true }];
     sortBy = sortBy || null; // 'createdAt';
-    sortDirection = sortDirection || 'desc';
+    sortDirection = sortDirection || 'desc'
+    let fs: any[] = JSON.parse(filters)
 
-    return await this.appService.findAllUsers(page, pageSize, filters, sortBy, sortDirection)
+    return await this.appService.findAllUsers(page, pageSize, fs, sortBy, sortDirection)
   }
 
   @Get('/users/:id')
