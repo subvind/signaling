@@ -2,13 +2,14 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Controller, Get, Put, Post, Delete, Body, Param } from '@nestjs/common';
 import { AppService } from './app.service';
-
-import { CreateUserDto } from './create-user.dto';
-import { UpdateUserDto } from './update-user.dto';
+import { SocketService } from './socket.service';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(
+    private readonly appService: AppService, 
+    private readonly socketService: SocketService
+  ) {}
 
   // @Get('/users')
   // getUsers(): string {
@@ -17,31 +18,40 @@ export class AppController {
 
   @Get('/user/:id')
   getUserById(@Param() params): string {
-    return this.appService.getUserById(params.id);
+    return JSON.stringify(
+      this.appService.getUserById(params.id)
+    );
   }
 
   @Put('/user/:id')
-  updateUserById(@Param() params, @Body() updateUserDto: UpdateUserDto): string {
-    let record: any = updateUserDto
+  updateUserById(@Param() params, @Body() record: any): string {
     record.updatedAt = new Date().toString()
-    let data = JSON.stringify(record)
-    return this.appService.updateUserById(params.id, data);
+    return JSON.stringify(
+      this.appService.updateUserById(params.id, record)
+    );
   }
 
   @Post('/user')
-  createUserById(@Body() createUserDto: CreateUserDto): string {
-    let record: any = createUserDto
+  createUserById(@Body() record: any): string {
     record.id = uuidv4()
     record.checkMark = false
     record.createdAt = new Date().toString()
-    let data = JSON.stringify(record)
-    return this.appService.createUserById(record.id, data);
+    return JSON.stringify(
+      this.appService.createUserById(record.id, record)
+    );
   }
 
-  @Post('/initiate/:fromId/return/:toId')
+  @Post('/initiate/:fromUserId/return/:toUserId')
   callUserById(@Param() params, @Body() firebase: any): string {
-    // TODO: authenticate initiate's firebase token
-    return this.appService.connect(params.fromId, params.toId);
+    // TODO: authenticate firebase token in order to prevent spam
+
+    let from = this.appService.getUserById(params.fromUserId)
+    let to = this.appService.getUserById(params.toUserId)
+    if (from && to) {
+      return this.appService.initiate(from, to, this.socketService);
+    } else {
+      return 'failed'
+    }
   }
 
   @Get()

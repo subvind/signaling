@@ -1,4 +1,4 @@
-export class CreateUserDto {
+export default class CreateUserDto {
   username: string;
   displayName: string;
   photo: string;
