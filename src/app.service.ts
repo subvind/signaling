@@ -38,9 +38,9 @@ export class AppService {
       userIds = await Promise.all(
         userIds.map(async (id) => {
           let record = JSON.parse(await that.redis.get(id));
-          for (let f of filters) {
-            for (const key in f) {
-              if (record[key] === f[key]) {
+          for (let filter of filters) {
+            for (const key in filter) {
+              if (record[key] === filter[key]) {
                 return id;
               }
             }
