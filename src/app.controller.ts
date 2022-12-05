@@ -1,8 +1,10 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { Controller, Get, Put, Post, Delete, Body, Param } from '@nestjs/common';
+import { Controller, ValidationPipe, UsePipes, Query, Get, Put, Post, Delete, Body, Param } from '@nestjs/common';
 import { AppService } from './app.service';
 import { SocketService } from './socket.service';
+
+import UserDto from './user.dto'
 
 @Controller()
 export class AppController {
@@ -11,47 +13,69 @@ export class AppController {
     private readonly socketService: SocketService
   ) {}
 
-  // @Get('/users')
-  // getUsers(): string {
-  //   return this.appService.getUsers();
-  // }
+  @Get('/users')
+  async findAllUsers(
+    @Query('page') page: number,
+    @Query('pageSize') pageSize: number,
+    @Query('filters') filters: any[],
+    @Query('sortBy') sortBy: string,
+    @Query('sortDirection') sortDirection: 'asc' | 'desc',
+  ): Promise<any> {
+    // example: /users?page=2&pageSize=50&filters=checkMark:true
+    page = page || 1;
+    pageSize = pageSize || 100;
+    filters = filters || null; // [{ checkMark: true }];
+    sortBy = sortBy || 'createdAt';
+    sortDirection = sortDirection || 'desc';
 
-  @Get('/user/:id')
-  getUserById(@Param() params): string {
-    return JSON.stringify(
-      this.appService.getUserById(params.id)
-    );
+    return await this.appService.findAllUsers(page, pageSize, filters, sortBy, sortDirection)
   }
 
-  @Put('/user/:id')
-  updateUserById(@Param() params, @Body() record: any): string {
-    record.updatedAt = new Date().toString()
-    return JSON.stringify(
-      this.appService.updateUserById(params.id, record)
-    );
+  @Get('/users/:id')
+  async getUserById(@Param() params): Promise<any> {
+    return await this.appService.getUserById(params.id)
   }
 
-  @Post('/user')
-  createUserById(@Body() record: any): string {
+  @Put('/users/:id')
+  async updateUserById(@Param() params, @Body() record: any): Promise<any> {
+    // TODO: authenticate firebase token in order to prevent spam
+
+    // TODO: prevent duplicate usernames
+
+    record.updatedAt = new Date().toISOString()
+    return await this.appService.updateUserById(params.id, record)
+  }
+
+  @Post('/users')
+  @UsePipes(new ValidationPipe())
+  async createUser(@Body() record: UserDto): Promise<any> {
     record.id = uuidv4()
     record.checkMark = false
-    record.createdAt = new Date().toString()
-    return JSON.stringify(
-      this.appService.createUserById(record.id, record)
-    );
+    record.createdAt = new Date().toISOString()
+
+    // TODO: prevent duplicate usernames
+
+    return await this.appService.createUser(record)
   }
 
   @Post('/initiate/:fromUserId/return/:toUserId')
-  callUserById(@Param() params, @Body() firebase: any): string {
+  async callUserById(@Param() params): Promise<string> {
     // TODO: authenticate firebase token in order to prevent spam
 
-    let from = this.appService.getUserById(params.fromUserId)
-    let to = this.appService.getUserById(params.toUserId)
+    let from = await this.appService.getUserById(params.fromUserId)
+    let to = await this.appService.getUserById(params.toUserId)
     if (from && to) {
       return this.appService.initiate(from, to, this.socketService);
     } else {
       return 'failed'
     }
+  }
+
+  @Delete('/users/:id')
+  async deleteUserById(@Param() params): Promise<any> {
+    // TODO: authenticate firebase token in order to prevent spam
+
+    return await this.appService.deleteUserById(params.id)
   }
 
   @Get()

@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
 
+import UserDto from './user.dto'
+
 import Redis from 'ioredis';
 import { v4 as uuidv4 } from 'uuid';
-
-import createUserDto from './create-user.dto'
-import updateUserDto from './update-user.dto'
 
 let url = process.env.REDIS_URL || 'redis-11687.c261.us-east-1-4.ec2.cloud.redislabs.com:11687'
 let username = process.env.REDIS_USERNAME || 'default'
@@ -21,31 +20,89 @@ export class AppService {
     this.redis = new Redis(connection);
   }
 
-  createUserById(id: string, value: createUserDto): any {
-    return this.redis.set(`user:${id}`, value);
+  // i need a find all users method in nestjs using ioredis
+  // add paging, filtering, and sorting to that method
+  async findAllUsers(
+    page: number,
+    pageSize: number,
+    filters: any,
+    sortBy: string,
+    sortDirection: 'asc' | 'desc',
+  ): Promise<any> {
+    let that = this 
+
+    let userIds = await this.redis.keys('user:*');
+    // console.log('userIds', userIds)
+    
+    // Apply filters, if any
+    for (const key in filters) {
+      const filterValue = filters[key];
+      userIds = userIds.filter((id) => {
+        return that.redis.get(id)[key] === filterValue
+      });
+    }
+
+    if (userIds.length) {
+      if (sortBy) {
+        // Apply sorting, if any
+        userIds = userIds.sort((a, b) => {
+          const aValue = that.redis.get(a)[sortBy];
+          const bValue = that.redis.get(b)[sortBy];
+          if (aValue === bValue) {
+            return 0;
+          }
+          if (sortDirection === 'asc') {
+            return aValue < bValue ? -1 : 1;
+          } else {
+            return aValue < bValue ? 1 : -1;
+          }
+        });
+      }
+    
+      // Apply paging
+      const startIndex = (page - 1) * pageSize;
+      const endIndex = startIndex + pageSize - 1;
+      userIds = userIds.slice(startIndex, endIndex + 1);
+      // console.log('final userIds', userIds)
+
+      // Retrieve the actual user objects
+      let results = await this.redis.mget(userIds);
+      let users = []
+      results.forEach((value) => {
+        users.push(JSON.parse(value))
+      })
+      return users
+    } else {
+      return []
+    }
   }
 
-  updateUserById(id: string, value: updateUserDto): any {
-    return this.redis.get(`user:${id}`, (err, result) => {
-      if (err) {
-        return err
-      } else {
-        let original = JSON.parse(result)
-        let change = value
-        let merged = JSON.stringify({ ...original, ...change })
-        return this.redis.set(`user:${id}`, merged);
-      }
-    });
+  async createUser(record: UserDto): Promise<any> {
+    let id = record.id
+    let value = JSON.stringify(record)
+
+    // Store the value as JSON-encoded data in Redis
+    await this.redis.set(`user:${id}`, value);
+
+    return record
   }
 
-  getUserById(id: string): any {
-    return this.redis.get(`user:${id}`, (err, result) => {
-      if (err) {
-        return err
-      } else {
-        return JSON.parse(result)
-      }
-    });
+  async updateUserById(id: string, record: UserDto): Promise<any> {
+    let result = await this.redis.get(`user:${id}`)
+    let original = JSON.parse(result)
+    let change = record
+    let merged = { ...original, ...change }
+    let save = JSON.stringify(merged)
+
+    // Store the value as JSON-encoded data in Redis
+    await this.redis.set(`user:${id}`, save);
+
+    return merged
+  }
+
+  async getUserById(id: string): Promise<any> {
+    let result = await this.redis.get(`user:${id}`)
+    return JSON.parse(result)
   }
 
   initiate (fromUser: any, toUser: any, socketService): any {
@@ -77,6 +134,16 @@ export class AppService {
     wss.trigger(channel2, event, message);
 
     return 'success'
+  }
+
+  async deleteUserById(id: string): Promise<any> {
+    let key = `user:${id}`
+    if (await this.redis.exists(key)) {
+      await this.redis.del(key);
+      return true;
+    } else {
+      return false;
+    }
   }
 
   getHello(): string {
