@@ -57,16 +57,16 @@ export class AppController {
   @Roles('verifiedEmail', 'registered')
   @HttpCode(HttpStatus.BAD_REQUEST)
   async updateUserById(@Param() params, @Body() record: any): Promise<any> {
-    // TODO: permission is grated to the owner only
+    // TODO: permission is granted to the owner only
     
     // prevent duplicate usernames
     // prevent duplicate firebaseIds
     let filters = []
     if (record.username) {
-      filters.push({username: record.username})
+      filters.push({ username: record.username })
     }
     if (record.firebaseId) {
-      filters.push({firebaseId: record.firebaseId})
+      filters.push({ firebaseId: record.firebaseId })
     }
     const existingUsers = await this.appService.findAllUsers(1, 1, filters, 'createdAt', 'desc');
     if (existingUsers.length) {
@@ -118,7 +118,7 @@ export class AppController {
   @Post('/initiate/:fromUserId/return/:toUserId')
   @Roles('verifiedEmail')
   async callUserById(@Param() params): Promise<string> {
-    // TODO: permission is grated to the owner only
+    // TODO: permission is granted to the owner only
 
     let from = await this.appService.getUserById(params.fromUserId)
     let to = await this.appService.getUserById(params.toUserId)
@@ -132,7 +132,7 @@ export class AppController {
   @Delete('/users/:id')
   @Roles('verifiedEmail')
   async deleteUserById(@Param() params): Promise<any> {
-    // TODO: permission is grated to the owner only
+    // TODO: permission is granted to the owner only
 
     return await this.appService.deleteUserById(params.id)
   }
