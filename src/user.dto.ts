@@ -59,7 +59,6 @@ export default class UserDto {
   url: string;
 
   @IsString()
-  @IsOptional()
   @Length(1, 128)
   firebaseId: string;
 
