@@ -1,12 +1,16 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { Controller, ValidationPipe, UsePipes, Query, Get, Put, Post, Delete, Body, Param } from '@nestjs/common';
+import { UseGuards, Controller, ValidationPipe, UsePipes, Query, Get, Put, Post, Delete, Body, Param } from '@nestjs/common';
 import { AppService } from './app.service';
 import { SocketService } from './socket.service';
+
+import { Roles } from './guards/roles.decorator';
+import { AuthenticatedGuard } from './guards/authenticated'
 
 import UserDto from './user.dto'
 
 @Controller()
+@UseGuards(AuthenticatedGuard)
 export class AppController {
   constructor(
     private readonly appService: AppService, 
@@ -38,9 +42,8 @@ export class AppController {
   }
 
   @Put('/users/:id')
+  @Roles('verifiedEmail', 'registered')
   async updateUserById(@Param() params, @Body() record: any): Promise<any> {
-    // TODO: authenticate firebase token in order to prevent spam
-
     // TODO: prevent duplicate usernames
 
     record.updatedAt = new Date().toISOString()
@@ -48,6 +51,7 @@ export class AppController {
   }
 
   @Post('/users')
+  @Roles('verifiedEmail')
   @UsePipes(new ValidationPipe())
   async createUser(@Body() record: UserDto): Promise<any> {
     record.id = uuidv4()
@@ -60,9 +64,8 @@ export class AppController {
   }
 
   @Post('/initiate/:fromUserId/return/:toUserId')
+  @Roles('verifiedEmail')
   async callUserById(@Param() params): Promise<string> {
-    // TODO: authenticate firebase token in order to prevent spam
-
     let from = await this.appService.getUserById(params.fromUserId)
     let to = await this.appService.getUserById(params.toUserId)
     if (from && to) {
@@ -73,9 +76,8 @@ export class AppController {
   }
 
   @Delete('/users/:id')
+  @Roles('verifiedEmail')
   async deleteUserById(@Param() params): Promise<any> {
-    // TODO: authenticate firebase token in order to prevent spam
-
     return await this.appService.deleteUserById(params.id)
   }
 
