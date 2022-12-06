@@ -20,9 +20,15 @@ export class AuthenticatedGuard extends AuthGuard('jwt') {
     }
 
     const request = context.switchToHttp().getRequest();
+
+    // Add additional error handling to handle cases where the authorization header is not present
+    if (!request.headers.authorization) {
+      return false;
+    }
+
     const token = request.headers.authorization.split(' ')[1];
     // console.log('token', token)
-    console.log('roles', roles)
+    // console.log('roles', roles)
 
     try {
       const decodedToken = await admin.auth().verifyIdToken(token);
@@ -30,7 +36,7 @@ export class AuthenticatedGuard extends AuthGuard('jwt') {
       
       if (roles.includes('verifiedEmail')) {
         if (decodedToken) {
-          return decodedToken.verified_email
+          return decodedToken.email_verified
         }
       } else if (roles.includes('registered')) {
         if (decodedToken) {
