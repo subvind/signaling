@@ -29,7 +29,7 @@ export class AppController {
     // example: /users?page=2&pageSize=50&filters=[{"username":"test"}]
     page = page || 1;
     pageSize = pageSize || 100;
-    filters = filters || null; // [{ checkMark: true }];
+    filters = filters || null; // [{ checkmark: true }];
     sortBy = sortBy || null; // 'createdAt';
     sortDirection = sortDirection || 'desc'
     let fs: any[] = JSON.parse(filters)
@@ -91,7 +91,7 @@ export class AppController {
   @HttpCode(HttpStatus.BAD_REQUEST)
   async createUser(@Body() record: UserDto): Promise<any> {
     record.id = uuidv4()
-    record.checkMark = false
+    record.checkmark = false
     record.createdAt = new Date().toISOString()
 
     // prevent duplicate usernames

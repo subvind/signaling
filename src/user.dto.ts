@@ -1,4 +1,17 @@
-import { IsUUID, IsString, Length, MaxLength, IsAlphanumeric, IsOptional, IsBoolean, IsDate, IsUrl } from 'class-validator';
+import { IsUUID, IsString, Length, MaxLength, IsAlphanumeric, IsOptional, IsBoolean, IsDate, IsUrl, IsEnum } from 'class-validator';
+
+enum Colors {
+  Red,
+  Orange,
+  Yellow,
+  Green,
+  Blue, // individuals
+  Purple,
+  Gold, // companies
+  Grey, // government accounts
+  White,
+  Black,
+}
 
 export default class UserDto {
   @IsString()
@@ -8,7 +21,11 @@ export default class UserDto {
 
   @IsBoolean()
   @IsOptional()
-  checkMark: boolean;
+  checkmark: boolean;
+
+  @IsEnum(Colors)
+  @IsOptional()
+  plan: Colors
 
   @IsString()
   @IsAlphanumeric()

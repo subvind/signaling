@@ -22,15 +22,20 @@ export class AuthenticatedGuard extends AuthGuard('jwt') {
     const request = context.switchToHttp().getRequest();
     const token = request.headers.authorization.split(' ')[1];
     // console.log('token', token)
-    // console.log('roles', roles)
+    console.log('roles', roles)
 
     try {
       const decodedToken = await admin.auth().verifyIdToken(token);
       // console.log('decodedToken', decodedToken)
-
-      if (decodedToken) {
-        // match roles with decodedToken
-        return true;
+      
+      if (roles.includes('verifiedEmail')) {
+        if (decodedToken) {
+          return decodedToken.verified_email
+        }
+      } else if (roles.includes('registered')) {
+        if (decodedToken) {
+          return true;
+        }
       }
 
       return false;
