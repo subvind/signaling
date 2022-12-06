@@ -93,7 +93,6 @@ export class AppService {
     let id = record.id
     let value = JSON.stringify(record)
 
-    // Store the value as JSON-encoded data in Redis
     await this.redis.set(`user:${id}`, value);
 
     return record
@@ -106,7 +105,6 @@ export class AppService {
     let merged = { ...original, ...change }
     let save = JSON.stringify(merged)
 
-    // Store the value as JSON-encoded data in Redis
     await this.redis.set(`user:${id}`, save);
 
     return merged
