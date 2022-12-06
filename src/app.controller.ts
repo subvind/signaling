@@ -18,6 +18,7 @@ export class AppController {
   ) {}
 
   @Get('/users')
+  @Roles('registered')
   async findAllUsers(
     @Query('page') page: number,
     @Query('pageSize') pageSize: number,
@@ -44,6 +45,7 @@ export class AppController {
   }
 
   @Get('/users/:id')
+  @Roles('registered')
   async getUserById(@Param() params): Promise<any> {
     let user = await this.appService.getUserById(params.id)
     
@@ -54,7 +56,7 @@ export class AppController {
   }
 
   @Put('/users/:id')
-  @Roles('verifiedEmail', 'registered')
+  @Roles('verifiedEmail')
   @HttpCode(HttpStatus.BAD_REQUEST)
   async updateUserById(@Param() params, @Body() record: any): Promise<any> {
     // TODO: permission is granted to the owner only
